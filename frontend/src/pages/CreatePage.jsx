@@ -9,16 +9,17 @@ export const CreatePage = () => {
         name: "",
         price: 0,
         Description: "",
-        Category: "",
-        SellerID: ""
+        Category: ""
     });
 
     const {createProduct} = useProductStore();  
 
     const handleSubmit = async () => {
         const res = await createProduct(newProduct);
-        console.log(res);
-        setNewProduct({name: "", price: 0, Description: "", Category: "", SellerID: ""});
+        if (res && res.success) {
+            setNewProduct({name: "", price: 0, Description: "", Category: ""});
+            alert('Product created successfully');
+        }
     };
 
   return <Container maxW="container.xl" bg="gray.700" color="white" py={4} textAlign="center">

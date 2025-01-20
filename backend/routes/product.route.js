@@ -1,17 +1,13 @@
 import express from 'express';
+import { protect } from '../middleware/auth.middleware.js';
 
 import { createProduct, deleteProduct, updateProduct, getProducts } from '../controllers/product.controller.js';
 
 const router = express.Router();
 
 router.get('/', getProducts);
-
-router.delete("/:id", deleteProduct);
-
-router.post('/', createProduct);
-
-//console.log(process.env.MONGO_URI);
-
-router.put("/:id", updateProduct);
+router.post('/', protect, createProduct);
+router.delete("/:id", protect, deleteProduct);
+router.put("/:id", protect, updateProduct);
 
 export default router;

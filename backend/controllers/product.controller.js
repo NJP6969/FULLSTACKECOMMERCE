@@ -17,6 +17,18 @@ export const deleteProduct = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Invalid product id' });
     }
     try {
+        const product = await Product.findById(id);
+        
+        // Check if product exists
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Check if user is the seller
+        if (product.SellerID.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ success: false, message: 'Not authorized to delete this product' });
+        }
+
         await Product.findByIdAndDelete(id);
         res.status(200).json({ success: true, message: 'Product deleted successfully' });
     }
@@ -27,11 +39,19 @@ export const deleteProduct = async (req, res) => {
 };
 
 export const createProduct = async (req, res) => {
-    const { name, price, Description, Category, SellerID } = req.body;
-    if (!name || !price || !Description || !Category || !SellerID) {
+    const { name, price, Description, Category } = req.body;
+    if (!name || !price || !Description || !Category) {
         return res.status(400).json({ success: false, message: 'All fields are required' });
     }
-    const newProduct = new Product({ name, price, Description, Category, SellerID });
+    
+    const newProduct = new Product({
+        name,
+        price,
+        Description,
+        Category,
+        SellerID: req.user._id  // Use logged-in user's ID
+    });
+    
     try {
         await newProduct.save();
         res.status(201).json({ success: true, data: newProduct });

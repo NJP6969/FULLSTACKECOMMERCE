@@ -19,9 +19,10 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     SellerID: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,  // Changed to ObjectId
+        ref: 'User',  // Reference to User model
         required: true
-    },
+    }
 },
 {
     timestamps: true 
