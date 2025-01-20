@@ -1,37 +1,37 @@
 import React from 'react';
 import { Container, Flex, Text, Button } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem('user'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   return (
     <Container maxW="container.xl" bg="gray.700" color="white" py={4} textAlign="center">
       <Flex justifyContent="space-between" alignItems="center" flexDir={{ base: 'column', sm: 'row' }}>
-      <Link to={"/"}> 
-        <Text
-          fontSize="2xl"
-          fontWeight="bold"
-          position="relative"
-          zIndex={1}
-          _before={{
-            content: '"Buy sell rent IIITH"',
-            position: "absolute",
-            top: 0,
-            left: 0,
-            background: "linear-gradient(to left, #7928CA, #FF0080)",
-            WebkitBackgroundClip: "text",
-            backgroundClip: "text",
-            color: "transparent",
-            zIndex: 2
-          }}
-        >
-         Buy sell rent IIITH
-        </Text>
+        <Link to="/"> 
+          <Text fontSize="2xl" fontWeight="bold">Buy sell rent IIITH</Text>
         </Link>
-        <Link to ="/create">
-        <Button ml="auto" colorScheme="teal" variant="solid">
-          ADD
-        </Button>
-        </Link>
+        <Flex gap={4}>
+          {user ? (
+            <>
+              <Link to="/create">
+                <Button colorScheme="teal" variant="solid">ADD</Button>
+              </Link>
+              <Button onClick={handleLogout} colorScheme="red">Logout</Button>
+            </>
+          ) : (
+            <Link to="/login">
+              <Button colorScheme="teal">Login</Button>
+            </Link>
+          )}
+        </Flex>
       </Flex>
     </Container>
   );
