@@ -7,6 +7,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from './components/ProtectedRoute';
+import ProfilePage from "./pages/ProfilePage";
+
 
 function App() {
   return (
@@ -23,6 +25,11 @@ function App() {
       <Route path="/create" element={
         <ProtectedRoute>
           <CreatePage />
+        </ProtectedRoute>
+      } />
+      <Route path="/profile" element={
+        <ProtectedRoute>
+          <ProfilePage />
         </ProtectedRoute>
       } />
     </Routes>

@@ -24,6 +24,9 @@ const Navbar = () => {
               <Link to="/create">
                 <Button colorScheme="teal" variant="solid">ADD</Button>
               </Link>
+              <Link to="/profile">
+                <Button colorScheme="teal" variant="solid">Profile</Button>
+              </Link>
               <Button onClick={handleLogout} colorScheme="red">Logout</Button>
             </>
           ) : (
