@@ -9,7 +9,7 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from './components/ProtectedRoute';
 import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
-
+import CartPage from "./pages/CartPage";
 
 function App() {
   return (
@@ -33,6 +33,11 @@ function App() {
           <ProfilePage />
         </ProtectedRoute>
       } />
+      <Route path="/cart" element={
+    <ProtectedRoute>
+        <CartPage />
+    </ProtectedRoute>
+     } />
       <Route path="/search" element={
                     <ProtectedRoute>
                         <SearchPage />

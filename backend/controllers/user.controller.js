@@ -35,3 +35,59 @@ export const updateProfile = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+
+export const addToCart = async (req, res) => {
+    try {
+        const { productId } = req.body;
+        const user = await User.findById(req.user._id);
+        
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Check if product already in cart
+        if (user.cart.includes(productId)) {
+            return res.status(400).json({ success: false, message: 'Product already in cart' });
+        }
+
+        user.cart.push(productId);
+        await user.save();
+
+        res.json({ success: true, message: 'Added to cart' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const getCart = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id)
+            .populate('cart');
+        
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        res.json({ success: true, data: user.cart });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+export const removeFromCart = async (req, res) => {
+    try {
+        const { productId } = req.params;
+        const user = await User.findById(req.user._id);
+        
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        user.cart = user.cart.filter(id => id.toString() !== productId);
+        await user.save();
+
+        res.json({ success: true, message: 'Removed from cart' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};

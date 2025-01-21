@@ -37,6 +37,9 @@ const Navbar = () => {
           <Link to="/search">
     <Button colorScheme="teal" variant="solid">Search</Button>
 </Link>
+<Link to="/cart">
+    <Button colorScheme="teal" variant="solid">Cart</Button>
+</Link>
         </Flex>
       </Flex>
     </Container>

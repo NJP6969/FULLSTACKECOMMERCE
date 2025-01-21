@@ -7,7 +7,29 @@ const ProductCard = ({ product }) => {
     const handleDelete = async () => {
         const result = await deleteProduct(product._id);
         if (result && result.success) {
-            console.log('Product deleted successfully');
+            alert('Product deleted successfully');
+        }
+    };
+
+    const handleAddToCart = async () => {
+        try {
+            const response = await fetch('/api/users/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ productId: product._id })
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                alert('Added to cart successfully');
+            } else {
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            alert(`Error adding to cart: ${error.message}`);
         }
     };
 
@@ -43,12 +65,14 @@ const ProductCard = ({ product }) => {
                 </Box>
                 <Box>
                     <HStack spacing={2}>
-                        <Button colorScheme="teal" size="sm">
+                        <Button colorScheme="teal" size="sm" onClick={handleAddToCart}>
                             Add to cart
                         </Button>
-                        <Button colorScheme="red" size="sm" onClick={handleDelete}>
-                            Delete
-                        </Button>
+                        {product.SellerID?._id === JSON.parse(localStorage.getItem('user'))?._id && (
+                            <Button colorScheme="red" size="sm" onClick={handleDelete}>
+                                Delete
+                            </Button>
+                        )}
                     </HStack>
                 </Box>
             </Box>
