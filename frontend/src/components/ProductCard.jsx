@@ -1,17 +1,25 @@
 import { Box, HStack, Button } from '@chakra-ui/react';
 import { useProductStore } from '../store/product';
+import { useNavigate } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
     const { deleteProduct } = useProductStore();
+    const navigate = useNavigate();
 
-    const handleDelete = async () => {
+    const handleClick = () => {
+        navigate(`/product/${product._id}`);
+    };
+
+    const handleDelete = async (e) => {
+        e.stopPropagation(); // Prevent triggering handleClick when deleting
         const result = await deleteProduct(product._id);
         if (result && result.success) {
             alert('Product deleted successfully');
         }
     };
-
-    const handleAddToCart = async () => {
+    
+    const handleAddToCart = async (e) => {
+        e.stopPropagation(); // Prevent triggering handleClick when adding to cart
         try {
             const response = await fetch('/api/users/cart', {
                 method: 'POST',
@@ -34,7 +42,15 @@ const ProductCard = ({ product }) => {
     };
 
     return (
-        <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
+        <Box 
+            maxW="sm" 
+            borderWidth="1px" 
+            borderRadius="lg" 
+            overflow="hidden" 
+            onClick={handleClick}
+            cursor="pointer"
+            _hover={{ shadow: 'md' }}
+        >
             <Box p="6">
                 <Box d="flex" alignItems="baseline">
                     <Box
@@ -65,11 +81,19 @@ const ProductCard = ({ product }) => {
                 </Box>
                 <Box>
                     <HStack spacing={2}>
-                        <Button colorScheme="teal" size="sm" onClick={handleAddToCart}>
+                        <Button 
+                            colorScheme="teal" 
+                            size="sm" 
+                            onClick={handleAddToCart}
+                        >
                             Add to cart
                         </Button>
                         {product.SellerID?._id === JSON.parse(localStorage.getItem('user'))?._id && (
-                            <Button colorScheme="red" size="sm" onClick={handleDelete}>
+                            <Button 
+                                colorScheme="red" 
+                                size="sm" 
+                                onClick={handleDelete}
+                            >
                                 Delete
                             </Button>
                         )}
