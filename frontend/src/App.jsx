@@ -8,6 +8,7 @@ import Register from "./pages/Register";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from './components/ProtectedRoute';
 import ProfilePage from "./pages/ProfilePage";
+import SearchPage from "./pages/SearchPage";
 
 
 function App() {
@@ -32,6 +33,12 @@ function App() {
           <ProfilePage />
         </ProtectedRoute>
       } />
+      <Route path="/search" element={
+                    <ProtectedRoute>
+                        <SearchPage />
+                    </ProtectedRoute>
+                } />
+            
     </Routes>
   </Box>
   )

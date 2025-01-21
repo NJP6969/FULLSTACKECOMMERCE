@@ -1,13 +1,9 @@
 import { Container, SimpleGrid, VStack } from '@chakra-ui/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Text } from '@chakra-ui/react'
 import { Link } from 'react-router-dom'
-import { use } from 'react'
 import { useProductStore } from '../store/product'
-import ProductCard from '../components/ProductCard';
-import { useEffect } from 'react'
-import { get } from 'mongoose'
-import { getProducts } from '../../../backend/controllers/product.controller'
+import ProductCard from '../components/ProductCard'
 
 const HomePage = () => {
   const { getProducts, products } = useProductStore();
@@ -20,7 +16,7 @@ const HomePage = () => {
     <Container maxW="container.lg">
       <VStack spacing={8} mt={8}>
         <Text fontSize="4xl">Current Products</Text>
-        <SimpleGrid columns={3} spacing={10}>
+        <SimpleGrid columns={[1, 2, 3]} spacing={10}>
           {products && products.length > 0 ? (
             products.map((product) => (
               <ProductCard key={product._id} product={product} />
@@ -38,30 +34,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-
-
-
-// const HomePage = () => {
-//   const {fetchProducts, products} = useProductStore();
-//    useEffect(() => {
-//      getProducts();
-//    }, [getProducts]);
-//    console.log(products);
-//    return (
-//      <Container maxW="container.lg">
-//        <VStack spacing={8} mt={8}>
-//          <Text fontSize="4xl">Current Products</Text>
-//          <SimpleGrid columns={3} spacing={10}>
-//          {products.map((product) => (
-//            <ProductCard key={product._id} product={product} />
-//          ))}
-//          </SimpleGrid>
-         
-//          <Link to={'/Create'}> <Text fontSize="2xl">No products yet</Text></Link>
-        
-//        </VStack>
-//      </Container>
-//    )
-//  }
-
-//above code only renders those products which u create

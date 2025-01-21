@@ -3,7 +3,23 @@ import mongoose from 'mongoose';
 
 export const getProducts = async (req, res) => {
     try {
-        const products = await Product.find({});
+        const { search, categories } = req.query;
+        let query = {};
+
+        // Search functionality
+        if (search && search.trim() !== '') {
+            query.name = { $regex: search, $options: 'i' };
+        }
+
+        // Category filter
+        if (categories && categories.trim() !== '') {
+            const categoryArray = categories.split(',').filter(cat => cat.trim() !== '');
+            if (categoryArray.length > 0) {
+                query.Category = { $in: categoryArray };
+            }
+        }
+
+        const products = await Product.find(query).populate('SellerID', 'firstName lastName');
         res.status(200).json({ success: true, data: products });
     } catch (error) {
         console.log(error);

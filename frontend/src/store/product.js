@@ -3,10 +3,10 @@ import { deleteProduct } from "../../../backend/controllers/product.controller";
 
 export const useProductStore = create((set) => ({
     products: [],
-    setProducts: (products) => set({products}), //local vs global state
+    setProducts: (products) => set({products}),
     createProduct: async (newProduct) => {
         if (!newProduct.name || !newProduct.price || !newProduct.Description || !newProduct.Category) {
-            return console.log('All fields are required');
+            return { success: false, message: 'All fields are required' };
         }
         try {
             const res = await fetch('/api/products', {
@@ -19,25 +19,42 @@ export const useProductStore = create((set) => ({
             });
             const data = await res.json();
             if (data.success) {
-                set((state) => ({ products: [...state.products, data.data] }));
+                set((state) => ({ 
+                    products: Array.isArray(state.products) 
+                        ? [...state.products, data.data] 
+                        : [data.data] 
+                }));
                 return { success: true, data: data.data };
             }
+            return { success: false, message: data.message };
         } catch (error) {
             console.log('Error creating product:', error);
-            return { success: false };
+            return { success: false, message: error.message };
         }
     },
-      
-    getProducts: async () => {
+    
+    getProducts: async (search = '', categories = []) => {
         try {
-            const res = await fetch('/api/products');
+            let url = '/api/products';
+            const params = new URLSearchParams();
+            
+            if (search) params.append('search', search);
+            if (categories?.length > 0) params.append('categories', categories.join(','));
+            
+            const queryString = params.toString();
+            url += queryString ? `?${queryString}` : '';
+            
+            const res = await fetch(url);
             const data = await res.json();
-            console.log(data);
-            set({ products: data.data });
+            if (data.success) {
+                set({ products: Array.isArray(data.data) ? data.data : [] });
+            }
         } catch (error) {
             console.log('Error getting products:', error);
+            set({ products: [] });
         }
-    },  
+    },
+
     deleteProduct: async (id) => {
         try {
             const res = await fetch(`/api/products/${id}`, {

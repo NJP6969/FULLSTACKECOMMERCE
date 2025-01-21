@@ -34,6 +34,9 @@ const Navbar = () => {
               <Button colorScheme="teal">Login</Button>
             </Link>
           )}
+          <Link to="/search">
+    <Button colorScheme="teal" variant="solid">Search</Button>
+</Link>
         </Flex>
       </Flex>
     </Container>

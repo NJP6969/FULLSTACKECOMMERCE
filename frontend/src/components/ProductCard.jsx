@@ -10,6 +10,7 @@ const ProductCard = ({ product }) => {
             console.log('Product deleted successfully');
         }
     };
+
     return (
         <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
             <Box p="6">
@@ -35,22 +36,17 @@ const ProductCard = ({ product }) => {
                     {product.name}
                 </Box>
 
+                <Box>Price: ₹{product.price}</Box>
+                <Box>Description: {product.Description}</Box>  
                 <Box>
-                    {product.price}
-                </Box>
-                <Box>
-                    {product.Description}
-                </Box>  
-                <Box>
-                    {product.SellerID}
+                    Seller: {product.SellerID?.firstName || 'Unknown'} {product.SellerID?.lastName || ''}
                 </Box>
                 <Box>
                     <HStack spacing={2}>
                         <Button colorScheme="teal" size="sm">
-                            Add to cart?
+                            Add to cart
                         </Button>
-                        <Button colorScheme="red" size="sm" onClick={() =>handleDelete(product._id)}>
-
+                        <Button colorScheme="red" size="sm" onClick={handleDelete}>
                             Delete
                         </Button>
                     </HStack>
