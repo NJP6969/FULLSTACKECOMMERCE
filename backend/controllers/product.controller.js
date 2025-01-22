@@ -1,10 +1,18 @@
 import Product from '../model/product.model.js';
 import mongoose from 'mongoose';
+import User from '../model/user.model.js';
+
 
 export const getProducts = async (req, res) => {
     try {
         const { search, categories } = req.query;
         let query = {};
+
+        let cartItems = [];
+        if (req.user) {
+            const user = await User.findById(req.user._id);
+            cartItems = user.cart.map(id => id.toString());
+        }
 
         // Search functionality
         if (search && search.trim() !== '') {
@@ -18,6 +26,11 @@ export const getProducts = async (req, res) => {
                 query.Category = { $in: categoryArray };
             }
         }
+
+        if (cartItems.length > 0) {
+            query._id = { $nin: cartItems };
+        }
+
 
         const products = await Product.find(query).populate('SellerID', 'firstName lastName');
         res.status(200).json({ success: true, data: products });

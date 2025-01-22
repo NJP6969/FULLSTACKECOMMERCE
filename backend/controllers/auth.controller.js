@@ -37,6 +37,8 @@ export const registerUser = async (req, res) => {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    age: user.age,
+                    contactNumber: user.contactNumber,
                     token: generateToken(user._id),
                 },
             });
@@ -60,6 +62,8 @@ export const loginUser = async (req, res) => {
                     firstName: user.firstName,
                     lastName: user.lastName,
                     email: user.email,
+                    age: user.age,
+                    contactNumber: user.contactNumber,
                     token: generateToken(user._id),
                 },
             });

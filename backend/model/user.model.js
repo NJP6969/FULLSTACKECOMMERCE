@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         validate: {
             validator: function(v) {
-                return /^[a-zA-Z0-9._%+-]+@iiit\.ac\.in$/.test(v);
+                return /^[a-zA-Z0-9._%+-]+@(iiit\.ac\.in|students\.iiit\.ac\.in|research\.iiit\.ac\.in)$/.test(v);
             },
             message: 'Only IIIT email addresses are allowed'
         }

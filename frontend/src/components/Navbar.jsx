@@ -43,6 +43,9 @@ const Navbar = () => {
 <Link to="/orders">
     <Button colorScheme="teal" variant="solid">Orders</Button>
 </Link>
+<Link to="/deliver">
+    <Button colorScheme="teal" variant="solid">Deliver Items</Button>
+</Link>
         </Flex>
       </Flex>
     </Container>

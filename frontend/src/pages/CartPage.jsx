@@ -31,6 +31,42 @@ const CartPage = () => {
             console.error('Error fetching cart:', error);
         }
     };
+    const handleCheckout = async () => {
+        try {
+            // Create orders for each cart item
+            const orderPromises = cartItems.map(item => 
+                fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        productId: item._id,
+                        sellerId: item.SellerID._id,
+                        amount: item.price
+                    })
+                }).then(res => res.json())
+            );
+    
+            const results = await Promise.all(orderPromises);
+            
+            // Check if all orders were created successfully
+            const allSuccessful = results.every(result => result.success);
+            
+            if (allSuccessful) {
+                alert('Orders placed successfully! Check your orders page for OTPs.');
+                // Clear cart after successful checkout
+                setCartItems([]);
+                setTotalAmount(0);
+            } else {
+                alert('Some orders failed to be placed');
+            }
+        } catch (error) {
+            alert('Error placing orders');
+            console.error('Error:', error);
+        }
+    };
 
     useEffect(() => {
         fetchCart();
@@ -79,7 +115,7 @@ const CartPage = () => {
                         <Box>
                             <Text fontSize="2xl" fontWeight="bold">Total: ₹{totalAmount}</Text>
                         </Box>
-                        <Button colorScheme="teal" size="lg">
+                        <Button colorScheme="teal" size="lg" onClick={handleCheckout}>
                             Proceed to Checkout
                         </Button>
                     </>
