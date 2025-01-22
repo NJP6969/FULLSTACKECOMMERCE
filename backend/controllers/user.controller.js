@@ -1,4 +1,5 @@
 import User from '../model/user.model.js';
+import Product from '../model/product.model.js';
 
 export const getProfile = async (req, res) => {
     try {
@@ -45,6 +46,22 @@ export const addToCart = async (req, res) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
+        const product = await Product.findById(productId);
+
+        // Check if product exists
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Product not found' });
+        }
+
+        // Check if user is trying to add their own product
+        if (product.SellerID.toString() === req.user._id.toString()) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'You cannot add your own product to cart' 
+            });
+        }
+                
+        
         // Check if product already in cart
         if (user.cart.includes(productId)) {
             return res.status(400).json({ success: false, message: 'Product already in cart' });
