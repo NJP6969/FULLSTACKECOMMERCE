@@ -71,6 +71,13 @@ const ProfilePage = () => {
                                     onChange={(e) => setFormData({...formData, contactNumber: e.target.value})}
                                 />
                             </Box>
+                            <Box>
+                                <Text mb={2}>Age</Text>
+                                <Input 
+                                    value={formData.age}
+                                    onChange={(e) => setFormData({...formData, age: e.target.value})}
+                                />  
+                            </Box>
                         </Stack>
                         <Button colorScheme="teal" onClick={handleUpdate}>Save Changes</Button>
                         <Button onClick={() => setIsEditing(false)}>Cancel</Button>
@@ -81,6 +88,7 @@ const ProfilePage = () => {
                         <Text>Last Name: {user?.lastName}</Text>
                         <Text>Email: {user?.email}</Text>
                         <Text>Contact Number: {user?.contactNumber}</Text>
+                        <Text>Age: {user?.age}</Text>
                         <Button colorScheme="teal" onClick={() => setIsEditing(true)}>Edit Profile</Button>
                     </>
                 )}

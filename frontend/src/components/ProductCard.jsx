@@ -2,7 +2,7 @@ import { Box, HStack, Button } from '@chakra-ui/react';
 import { useProductStore } from '../store/product';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, inCart, onRemove}) => {
     const { deleteProduct } = useProductStore();
     const navigate = useNavigate();
 
@@ -81,13 +81,26 @@ const ProductCard = ({ product }) => {
                 </Box>
                 <Box>
                     <HStack spacing={2}>
-                        <Button 
+                       {!inCart &&( <Button 
                             colorScheme="teal" 
                             size="sm" 
                             onClick={handleAddToCart}
                         >
                             Add to cart
                         </Button>
+                       )}
+                        {inCart && (
+                            <Button 
+                                colorScheme="red" 
+                                size="sm" 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onRemove();
+                                }}
+                            >
+                                Remove from cart
+                            </Button>
+                        )}
                         {product.SellerID?._id === JSON.parse(localStorage.getItem('user'))?._id && (
                             <Button 
                                 colorScheme="red" 

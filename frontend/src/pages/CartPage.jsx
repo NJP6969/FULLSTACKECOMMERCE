@@ -41,6 +41,25 @@ const CartPage = () => {
         setTotalAmount(total);
     };
 
+    const handleRemoveFromCart = async (productId) => {
+        try {
+            const response = await fetch(`/api/users/cart/${productId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                fetchCart(); // Refresh cart after removing item
+            } else {
+                alert(data.message);
+            }
+        } catch (error) {
+            console.error('Error removing from cart:', error);
+        }
+    };
+
     return (
         <Container maxW="container.xl" py={8}>
             <VStack spacing={8}>
@@ -52,7 +71,8 @@ const CartPage = () => {
                                 <ProductCard 
                                     key={product._id} 
                                     product={product}
-                                    onRemove={fetchCart}
+                                    inCart={true} // Pass inCart prop to ProductCard
+                                    onRemove={() => handleRemoveFromCart(product._id)}
                                 />
                             ))}
                         </SimpleGrid>
