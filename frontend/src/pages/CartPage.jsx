@@ -5,12 +5,14 @@ import {
     Heading, 
     SimpleGrid, 
     Text,
-    Button
+    Button,
+    Box
 } from '@chakra-ui/react';
 import ProductCard from '../components/ProductCard';
 
 const CartPage = () => {
     const [cartItems, setCartItems] = useState([]);
+    const [totalAmount, setTotalAmount] = useState(0);
 
     const fetchCart = async () => {
         try {
@@ -23,6 +25,7 @@ const CartPage = () => {
             
             if (data.success) {
                 setCartItems(data.data);
+                calculateTotal(data.data);
             }
         } catch (error) {
             console.error('Error fetching cart:', error);
@@ -32,6 +35,11 @@ const CartPage = () => {
     useEffect(() => {
         fetchCart();
     }, []);
+
+    const calculateTotal = (items) => {
+        const total = items.reduce((sum, item) => sum + Number(item.price), 0);
+        setTotalAmount(total);
+    };
 
     return (
         <Container maxW="container.xl" py={8}>
@@ -48,6 +56,9 @@ const CartPage = () => {
                                 />
                             ))}
                         </SimpleGrid>
+                        <Box>
+                            <Text fontSize="2xl" fontWeight="bold">Total: ₹{totalAmount}</Text>
+                        </Box>
                         <Button colorScheme="teal" size="lg">
                             Proceed to Checkout
                         </Button>

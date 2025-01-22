@@ -40,6 +40,9 @@ const Navbar = () => {
 <Link to="/cart">
     <Button colorScheme="teal" variant="solid">Cart</Button>
 </Link>
+<Link to="/orders">
+    <Button colorScheme="teal" variant="solid">Orders</Button>
+</Link>
         </Flex>
       </Flex>
     </Container>

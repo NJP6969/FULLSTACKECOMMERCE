@@ -11,6 +11,7 @@ import ProfilePage from "./pages/ProfilePage";
 import SearchPage from "./pages/SearchPage";
 import CartPage from "./pages/CartPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import OrdersPage from "./pages/OrdersPage";
 
 function App() {
   return (
@@ -39,6 +40,11 @@ function App() {
         <CartPage />
     </ProtectedRoute>
      } />
+     <Route path="/orders" element={
+    <ProtectedRoute>
+        <OrdersPage />
+    </ProtectedRoute>
+   } />
      <Route path="/product/:id" element={
     <ProtectedRoute>
         <ProductDetailPage />
@@ -51,6 +57,7 @@ function App() {
                 } />
             
     </Routes>
+
   </Box>
   )
 }
