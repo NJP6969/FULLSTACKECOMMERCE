@@ -2,7 +2,7 @@ import { Box, HStack, Button } from '@chakra-ui/react';
 import { useProductStore } from '../store/product';
 import { useNavigate } from 'react-router-dom';
 
-const ProductCard = ({ product, inCart, onRemove}) => {
+const ProductCard = ({ product, inCart, onRemove, onAddToCart }) => {
     const { deleteProduct } = useProductStore();
     const navigate = useNavigate();
 
@@ -33,6 +33,9 @@ const ProductCard = ({ product, inCart, onRemove}) => {
             
             if (data.success) {
                 alert('Added to cart successfully');
+                if (onAddToCart) {
+                    onAddToCart(product._id); // Call the function to remove the product from the homepage
+                }
             } else {
                 throw new Error(data.message);
             }
@@ -81,14 +84,15 @@ const ProductCard = ({ product, inCart, onRemove}) => {
                 </Box>
                 <Box>
                     <HStack spacing={2}>
-                       {!inCart &&( <Button 
-                            colorScheme="teal" 
-                            size="sm" 
-                            onClick={handleAddToCart}
-                        >
-                            Add to cart
-                        </Button>
-                       )}
+                        {!inCart && (
+                            <Button 
+                                colorScheme="teal" 
+                                size="sm" 
+                                onClick={handleAddToCart}
+                            >
+                                Add to cart
+                            </Button>
+                        )}
                         {inCart && (
                             <Button 
                                 colorScheme="red" 
