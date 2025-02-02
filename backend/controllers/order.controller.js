@@ -5,36 +5,44 @@ import bcrypt from 'bcryptjs';
 export const createOrder = async (req, res) => {
     try {
         const { productId, sellerId, amount } = req.body;
-        const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
         
-        // Hash the OTP before saving
-        const salt = await bcrypt.genSalt(10);
-        const hashedOtp = await bcrypt.hash(otp, salt);
+        // Validate required fields
+        if (!productId || !sellerId || !amount) {
+            return res.status(400).json({ 
+                success: false, 
+                message: 'Missing required fields' 
+            });
+        }
+
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Create unique transaction ID
+        const transactionId = uuidv4();
 
         const order = await Order.create({
-            transactionId: uuidv4(),
+            transactionId,
             buyerId: req.user._id,
             sellerId,
             productId,
-            amount,
-            otp: hashedOtp
+            amount: parseFloat(amount),
+            otp
         });
 
+        // Send response with unhashed OTP
         res.status(201).json({ 
             success: true, 
             data: { 
-                _id: order._id,
-                transactionId: order.transactionId,
-                buyerId: order.buyerId,
-                sellerId: order.sellerId,
-                productId: order.productId,
-                amount: order.amount,
-                status: order.status,
-                otp // Send the unhashed OTP
+                ...order.toObject(),
+                otp // Include unhashed OTP in response
             } 
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        console.error('Order creation error:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: error.message || 'Error creating order'
+        });
     }
 };
 
@@ -46,8 +54,15 @@ export const getDeliveryOrders = async (req, res) => {
         })
         .populate('productId')
         .populate('buyerId', 'firstName lastName');
+        
+        // Include OTP for seller to verify
+        const ordersWithOtp = orders.map(order => {
+            const orderObj = order.toObject();
+            // Here seller should see the OTP
+            return orderObj;
+        });
 
-        res.json({ success: true, data: orders });
+        res.json({ success: true, data: ordersWithOtp });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
@@ -98,15 +113,36 @@ export const getMyOrders = async (req, res) => {
         .populate('buyerId', 'firstName lastName')
         .populate('sellerId', 'firstName lastName');
 
-        const pendingOrders = orders.filter(order => order.status === 'pending');
-        const boughtItems = orders.filter(order => 
-            order.buyerId._id.toString() === req.user._id.toString() && 
-            order.status === 'completed'
-        );
-        const soldItems = orders.filter(order => 
-            order.sellerId._id.toString() === req.user._id.toString() && 
-            order.status === 'completed'
-        );
+        // Transform orders to show OTP only to buyers
+        const transformOrder = (order) => {
+            const orderObj = order.toObject();
+            // Only include unhashed OTP if current user is the buyer AND order is pending
+            if (orderObj.buyerId._id.toString() === req.user._id.toString() && 
+                orderObj.status === 'pending') {
+                orderObj.otp = order.otp; // Include unhashed OTP
+            } else {
+                delete orderObj.otp; // Remove OTP for non-buyers
+            }
+            return orderObj;
+        };
+
+        const pendingOrders = orders
+            .filter(order => order.status === 'pending')
+            .map(transformOrder);
+            
+        const boughtItems = orders
+            .filter(order => 
+                order.buyerId._id.toString() === req.user._id.toString() && 
+                order.status === 'completed'
+            )
+            .map(transformOrder);
+            
+        const soldItems = orders
+            .filter(order => 
+                order.sellerId._id.toString() === req.user._id.toString() && 
+                order.status === 'completed'
+            )
+            .map(transformOrder);
 
         res.json({
             success: true,

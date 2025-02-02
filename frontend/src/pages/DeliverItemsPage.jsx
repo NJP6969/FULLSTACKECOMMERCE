@@ -12,7 +12,8 @@ import {
 
 const DeliverItemsPage = () => {
     const [orders, setOrders] = useState([]);
-    const [otps, setOtps] = useState({});
+    const [otpInputs, setOtpInputs] = useState({});
+
 
     useEffect(() => {
         fetchOrders();
@@ -35,14 +36,7 @@ const DeliverItemsPage = () => {
         }
     };
 
-    const handleOtpChange = (orderId, value) => {
-        setOtps(prev => ({
-            ...prev,
-            [orderId]: value
-        }));
-    };
-
-    const handleCompleteOrder = async (orderId) => {
+    const handleCompleteOrder = async (orderId, otp) => {
         try {
             const response = await fetch(`/api/orders/${orderId}/complete`, {
                 method: 'PUT',
@@ -50,15 +44,48 @@ const DeliverItemsPage = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
                 },
-                body: JSON.stringify({ otp: otps[orderId] })
+                body: JSON.stringify({ otp })
             });
-            const data = await response.json();
             
+            const data = await response.json();
             if (data.success) {
                 alert('Order completed successfully');
-                fetchOrders();
+                fetchOrders(); // Refresh orders list
             } else {
                 alert(data.message || 'Error completing order');
+            }
+        } catch (error) {
+            alert('Error completing order');
+        }
+    };
+    const handleOtpSubmit = async (orderId) => {
+        try {
+            const otp = otpInputs[orderId];
+            if (!otp) {
+                alert('Please enter OTP');
+                return;
+            }
+
+            const response = await fetch(`/api/orders/${orderId}/complete`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({ otp })
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                alert('Order completed successfully');
+                setOtpInputs(prev => {
+                    const newInputs = {...prev};
+                    delete newInputs[orderId];
+                    return newInputs;
+                });
+                fetchOrders(); // Refresh orders list
+            } else {
+                alert(data.message || 'Invalid OTP');
             }
         } catch (error) {
             alert('Error completing order');
@@ -68,7 +95,7 @@ const DeliverItemsPage = () => {
     return (
         <Container maxW="container.xl" py={8}>
             <VStack spacing={8}>
-                <Heading>Deliver Items</Heading>
+                <Heading>Delivery Orders</Heading>
                 <SimpleGrid columns={[1, 2]} spacing={4} w="100%">
                     {orders.map(order => (
                         <Box 
@@ -80,18 +107,23 @@ const DeliverItemsPage = () => {
                             <Text>Product: {order.productId.name}</Text>
                             <Text>Price: ₹{order.amount}</Text>
                             <Text>Buyer: {order.buyerId.firstName} {order.buyerId.lastName}</Text>
-                            <Input
-                                mt={2}
-                                placeholder="Enter OTP"
-                                value={otps[order._id] || ''}
-                                onChange={(e) => handleOtpChange(order._id, e.target.value)}
+                            <Input 
+                                mt={4}
+                                placeholder="Enter OTP from buyer"
+                                value={otpInputs[order._id] || ''}
+                                onChange={(e) => setOtpInputs(prev => ({
+                                    ...prev,
+                                    [order._id]: e.target.value
+                                }))}
                             />
                             <Button
                                 mt={2}
                                 colorScheme="teal"
-                                onClick={() => handleCompleteOrder(order._id)}
+                                onClick={() => handleOtpSubmit(order._id)}
+                                isDisabled={!otpInputs[order._id]}
+                                w="full"
                             >
-                                Complete Order
+                                Verify & Complete Order
                             </Button>
                         </Box>
                     ))}
@@ -103,5 +135,4 @@ const DeliverItemsPage = () => {
         </Container>
     );
 };
-
 export default DeliverItemsPage;

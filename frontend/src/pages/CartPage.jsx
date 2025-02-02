@@ -24,6 +24,7 @@ const CartPage = () => {
             const data = await response.json();
             
             if (data.success) {
+                console.log('Cart items:', data.data); // Debug log
                 setCartItems(data.data);
                 calculateTotal(data.data);
             }
@@ -31,42 +32,62 @@ const CartPage = () => {
             console.error('Error fetching cart:', error);
         }
     };
-    const handleCheckout = async () => {
-        try {
-            // Create orders for each cart item
-            const orderPromises = cartItems.map(item => 
-                fetch('/api/orders', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({
+               const handleCheckout = async () => {
+            try {
+                console.log('Attempting checkout with cart items:', cartItems);
+                
+                for (const item of cartItems) {
+                    console.log('Processing item:', item); // Full item log
+                    
+                    // Get seller ID from the item's SellerID field
+                    const sellerId = typeof item.SellerID === 'string' ? item.SellerID : item.SellerID?._id;
+                    
+                    if (!sellerId) {
+                        throw new Error(`No seller ID found for product ${item.name}`);
+                    }
+        
+                    const orderData = {
                         productId: item._id,
-                        sellerId: item.SellerID._id,
-                        amount: item.price
-                    })
-                }).then(res => res.json())
-            );
-    
-            const results = await Promise.all(orderPromises);
-            
-            // Check if all orders were created successfully
-            const allSuccessful = results.every(result => result.success);
-            
-            if (allSuccessful) {
-                alert('Orders placed successfully! Check your orders page for OTPs.');
-                // Clear cart after successful checkout
+                        sellerId: sellerId,
+                        amount: parseFloat(item.price)
+                    };
+        
+                    console.log('Sending order data:', orderData);
+        
+                    const response = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
+                        body: JSON.stringify(orderData)
+                    });
+        
+                    const data = await response.json();
+                    console.log('Order creation response:', data);
+                    
+                    if (!data.success) {
+                        throw new Error(data.message || 'Failed to create order');
+                    }
+                }
+        
+                // Clear cart
+                await fetch('/api/users/cart', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+        
                 setCartItems([]);
                 setTotalAmount(0);
-            } else {
-                alert('Some orders failed to be placed');
+                alert('Orders placed successfully! Check your orders page for OTPs.');
+        
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert(`Error placing orders: ${error.message}`);
             }
-        } catch (error) {
-            alert('Error placing orders');
-            console.error('Error:', error);
-        }
-    };
+        };
 
     useEffect(() => {
         fetchCart();

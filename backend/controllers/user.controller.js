@@ -75,18 +75,26 @@ export const addToCart = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
-
 export const getCart = async (req, res) => {
     try {
         const user = await User.findById(req.user._id)
-            .populate('cart');
+            .populate({
+                path: 'cart',
+                populate: {
+                    path: 'SellerID',
+                    model: 'User',
+                    select: '_id firstName lastName'
+                }
+            });
         
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
+        console.log('Cart items with seller:', user.cart); // Debug log
         res.json({ success: true, data: user.cart });
     } catch (error) {
+        console.error('Get cart error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };

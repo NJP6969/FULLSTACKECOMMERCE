@@ -37,26 +37,32 @@ const OrdersPage = () => {
         fetchOrders();
     }, []);
 
-    const OrderCard = ({ order }) => (
+    const OrderCard = ({ order, isBuyer }) => (
         <Box p={4} borderWidth="1px" borderRadius="lg">
             <Text>Transaction ID: {order.transactionId}</Text>
             <Text>Amount: ₹{order.amount}</Text>
             <Text>Product: {order.productId.name}</Text>
             <Text>Status: {order.status}</Text>
-            {order.otp && <Text>OTP: {order.otp}</Text>}
+            {isBuyer && order.status === 'pending' && order.otp && (
+                <Text fontWeight="bold" color="teal">Your OTP: {order.otp}</Text>
+            )}
         </Box>
     );
 
     const renderActiveTab = () => {
         switch(activeTab) {
             case 'pending':
-                return (
-                    <SimpleGrid columns={[1, 2]} spacing={4}>
-                        {orders.pendingOrders.map(order => (
-                            <OrderCard key={order._id} order={order} />
-                        ))}
-                    </SimpleGrid>
-                );
+    return (
+        <SimpleGrid columns={[1, 2]} spacing={4}>
+            {orders.pendingOrders.map(order => (
+                <OrderCard 
+                    key={order._id} 
+                    order={order}
+                    isBuyer={order.buyerId._id === JSON.parse(localStorage.getItem('user'))._id}
+                />
+            ))}
+        </SimpleGrid>
+    );
             case 'bought':
                 return (
                     <SimpleGrid columns={[1, 2]} spacing={4}>

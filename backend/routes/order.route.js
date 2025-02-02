@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/', protect, createOrder);
 router.get('/my-orders', protect, getMyOrders);
-router.get('/delivery-orders', protect, getDeliveryOrders);
+router.get('/deliver-orders', protect, getDeliveryOrders);
 router.put('/:id/complete', protect, completeOrder);
 
 export default router;
