@@ -1,6 +1,7 @@
 import Product from '../model/product.model.js';
 import mongoose from 'mongoose';
 import User from '../model/user.model.js';
+import Order from '../model/order.model.js';
 
 
 export const getProducts = async (req, res) => {
@@ -13,6 +14,16 @@ export const getProducts = async (req, res) => {
             const user = await User.findById(req.user._id);
             cartItems = user.cart.map(id => id.toString());
         }
+
+        // Find all products that have pending/completed orders
+        const orderedProducts = await Order.find({
+            status: { $in: ['pending', 'completed'] }
+        }).distinct('productId');
+
+        // Add to query to exclude ordered products
+        query._id = { 
+            $nin: [...cartItems, ...orderedProducts.map(id => id.toString())] 
+        };
 
         // Search functionality
         if (search && search.trim() !== '') {
@@ -27,11 +38,6 @@ export const getProducts = async (req, res) => {
             }
         }
 
-        if (cartItems.length > 0) {
-            query._id = { $nin: cartItems };
-        }
-
-
         const products = await Product.find(query).populate('SellerID', 'firstName lastName');
         res.status(200).json({ success: true, data: products });
     } catch (error) {
@@ -39,7 +45,6 @@ export const getProducts = async (req, res) => {
         res.status(500).json({ success: false, message: 'Internal server error' });
     }
 };
-
 export const deleteProduct = async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
