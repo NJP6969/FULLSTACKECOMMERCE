@@ -16,7 +16,7 @@ export const createOrder = async (req, res) => {
 
         // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        
+        console.log(`Generated OTP: ${otp}`);
         // Create unique transaction ID
         const transactionId = uuidv4();
 
@@ -70,10 +70,10 @@ export const getDeliveryOrders = async (req, res) => {
 
 export const completeOrder = async (req, res) => {
     try {
-        const { orderId } = req.params;
+        const { id } = req.params;
         const { otp } = req.body;
         
-        const order = await Order.findById(orderId);
+        const order = await Order.findById(id);
         
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
