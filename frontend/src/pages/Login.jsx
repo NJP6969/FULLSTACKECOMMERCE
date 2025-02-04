@@ -5,26 +5,44 @@ import {
     Heading, 
     Input, 
     Button, 
-    Text 
+    Text,
+    Box 
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
+import ReCAPTCHA from "react-google-recaptcha";
+
+// Use VITE_ prefix for environment variables in Vite
+const RECAPTCHA_SITE_KEY = "6Le_G80qAAAAAIY6hY-CNau3gqV_dRmNfIVwsjlF";
 
 const Login = () => {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
+    const [captchaToken, setCaptchaToken] = useState(null);
     const navigate = useNavigate();
+
+    const handleCaptchaChange = (value) => {
+        setCaptchaToken(value);
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!captchaToken) {
+            alert('Please complete the captcha');
+            return;
+        }
+
         try {
             const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({
+                    ...formData,
+                    captchaToken
+                }),
             });
             const data = await res.json();
             if (data.success) {
@@ -56,7 +74,18 @@ const Login = () => {
                     value={formData.password}
                     onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
-                <Button colorScheme="teal" onClick={handleSubmit} w="full">
+                <Box>
+                    <ReCAPTCHA
+                        sitekey={RECAPTCHA_SITE_KEY}
+                        onChange={handleCaptchaChange}
+                    />
+                </Box>
+                <Button 
+                    colorScheme="teal" 
+                    onClick={handleSubmit} 
+                    w="full"
+                    isDisabled={!captchaToken}
+                >
                     Login
                 </Button>
                 <Text>
