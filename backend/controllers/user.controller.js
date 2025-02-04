@@ -20,6 +20,7 @@ export const updateProfile = async (req, res) => {
         user.firstName = req.body.firstName || user.firstName;
         user.lastName = req.body.lastName || user.lastName;
         user.contactNumber = req.body.contactNumber || user.contactNumber;
+        user.age = req.body.age || user.age;
 
         const updatedUser = await user.save();
         res.json({
@@ -29,7 +30,8 @@ export const updateProfile = async (req, res) => {
                 firstName: updatedUser.firstName,
                 lastName: updatedUser.lastName,
                 email: updatedUser.email,
-                contactNumber: updatedUser.contactNumber
+                contactNumber: updatedUser.contactNumber,
+                age: updatedUser.age
             }
         });
     } catch (error) {
