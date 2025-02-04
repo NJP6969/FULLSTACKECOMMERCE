@@ -13,6 +13,7 @@ import CartPage from "./pages/CartPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
 import OrdersPage from "./pages/OrdersPage";
 import DeliverItemsPage from "./pages/DeliverItemsPage";
+import ChatBot from "./components/ChatBot";
 
 
 function App() {
@@ -64,7 +65,7 @@ function App() {
                 } />
             
     </Routes>
-
+    <ChatBot />
   </Box>
   )
 }

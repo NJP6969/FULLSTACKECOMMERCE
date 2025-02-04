@@ -5,6 +5,7 @@ import productRoutes from './routes/product.route.js';
 import authRoutes from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import OrderRoutes from './routes/order.route.js';
+import chatRoutes from './routes/chat.route.js';
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ app.use("/api/products", productRoutes);
 app.use("/api/auth", authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', OrderRoutes);
+app.use('/api/chat', chatRoutes);
 
 app.get('/', (req, res) => {
     res.send('API is running...');
