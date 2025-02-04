@@ -31,7 +31,7 @@ const Login = () => {
                 localStorage.setItem('token', data.data.token);
                 localStorage.setItem('user', JSON.stringify(data.data));
                 alert('Login Successful');
-                navigate('/');
+                navigate('/profile');
             } else {
                 alert(data.message || 'Login failed');
             }
