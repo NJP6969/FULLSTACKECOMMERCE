@@ -16,7 +16,21 @@ const productSchema = new mongoose.Schema({
     },
     Category: {
         type: String,
-        required: true
+        required: true,
+        enum: [
+            "Electronics",
+            "Books",
+            "Furniture",
+            "Clothing",
+            "Sports Equipment",
+            "Lab Equipment",
+            "Study Material",
+            "Musical Instruments",
+            "Stationery",
+            "Food",
+            "Grocery",
+            "Others"
+        ]
     },
     SellerID: {
         type: mongoose.Schema.Types.ObjectId,  // Changed to ObjectId

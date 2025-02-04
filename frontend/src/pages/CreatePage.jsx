@@ -1,15 +1,30 @@
-import React from 'react'
+import React from 'react';
 import { useState } from 'react';
 import { Container, VStack, Heading, Input, Button } from '@chakra-ui/react';
 import { useProductStore } from '../store/product';
 
-export const CreatePage = () => {
+const CreatePage = () => {
     const [newProduct, setNewProduct] = useState({
         name: "",
         price: 0,
         Description: "",
         Category: ""
     });
+
+    const categories = [
+        "Electronics",
+        "Books",
+        "Furniture",
+        "Clothing",
+        "Sports Equipment",
+        "Lab Equipment",
+        "Study Material",
+        "Musical Instruments",
+        "Stationery",
+        "Food",
+        "Grocery",
+        "Others"
+    ];
 
     const { createProduct } = useProductStore();  
 
@@ -49,12 +64,32 @@ export const CreatePage = () => {
                     value={newProduct.Description} 
                     onChange={(e) => setNewProduct({ ...newProduct, Description: e.target.value })}
                 />
-                <Input 
-                    placeholder="Category" 
-                    name="Category" 
-                    value={newProduct.Category} 
+                <select 
+                    style={{
+                        width: '100%',
+                        padding: '8px',
+                        borderRadius: '5px',
+                        backgroundColor: 'transparent',
+                        color: 'white',
+                        border: '1px solid white'
+                    }}
+                    value={newProduct.Category}
                     onChange={(e) => setNewProduct({ ...newProduct, Category: e.target.value })}
-                />
+                >
+                    <option value="" disabled>Select category</option>
+                    {categories.map((category) => (
+                        <option 
+                            key={category} 
+                            value={category}
+                            style={{
+                                backgroundColor: '#2D3748',
+                                color: 'white'
+                            }}
+                        >
+                            {category}
+                        </option>
+                    ))}
+                </select>
                 <Button colorScheme="teal" onClick={handleSubmit} w="full">Submit</Button>
             </VStack>
         </Container>

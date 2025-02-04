@@ -9,6 +9,7 @@ export const getProducts = async (req, res) => {
         const { search, categories } = req.query;
         let query = {};
 
+        // Get cart items
         let cartItems = [];
         if (req.user) {
             const user = await User.findById(req.user._id);
@@ -17,20 +18,27 @@ export const getProducts = async (req, res) => {
 
         // Find all products that have pending/completed orders
         const orderedProducts = await Order.find({
-            status: { $in: ['pending', 'completed'] }
+            $or: [
+                { status: 'pending' },
+                { status: 'completed' }
+            ]
         }).distinct('productId');
 
-        // Add to query to exclude ordered products
+        // Add to query to exclude both cart items and ordered products
         query._id = { 
-            $nin: [...cartItems, ...orderedProducts.map(id => id.toString())] 
+            $nin: [
+                ...cartItems, 
+                ...orderedProducts.map(id => id.toString())
+            ] 
         };
 
-        // Search functionality
+        // Add search functionality
         if (search && search.trim() !== '') {
-            query.name = { $regex: search, $options: 'i' };
+            const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            query.name = { $regex: escapedSearch, $options: 'i' };
         }
 
-        // Category filter
+        // Add category filter
         if (categories && categories.trim() !== '') {
             const categoryArray = categories.split(',').filter(cat => cat.trim() !== '');
             if (categoryArray.length > 0) {
@@ -38,7 +46,9 @@ export const getProducts = async (req, res) => {
             }
         }
 
-        const products = await Product.find(query).populate('SellerID', 'firstName lastName');
+        const products = await Product.find(query)
+            .populate('SellerID', 'firstName lastName');
+
         res.status(200).json({ success: true, data: products });
     } catch (error) {
         console.log(error);
