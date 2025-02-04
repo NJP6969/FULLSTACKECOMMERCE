@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     Container, 
     VStack, 
@@ -6,7 +6,8 @@ import {
     Input, 
     Button, 
     Text,
-    Box 
+    Box,
+    Divider
 } from '@chakra-ui/react';
 import { Link, useNavigate } from 'react-router-dom';
 import ReCAPTCHA from "react-google-recaptcha";
@@ -57,11 +58,54 @@ const Login = () => {
             alert('Error logging in');
         }
     };
-
+        // Add useEffect to handle CAS callback
+        useEffect(() => {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('token');
+            
+            if (token) {
+                // Token exists in URL, complete login
+                localStorage.setItem('token', token);
+                
+                // Fetch user data using the token
+                fetch('/api/users/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        localStorage.setItem('user', JSON.stringify(data.data));
+                        navigate('/profile');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching user data:', err);
+                    // Clear invalid token
+                    localStorage.removeItem('token');
+                });
+            }
+        }, [navigate]);
+    const handleCASLogin = () => {
+        window.location.href = 'http://localhost:5000/api/auth/cas/login';
+    };
     return (
         <Container maxW="container.sm" py={10}>
             <VStack spacing={4}>
                 <Heading>Login</Heading>
+                
+                <Button 
+                    colorScheme="blue" 
+                    onClick={handleCASLogin} 
+                    w="full"
+                >
+                    Login with IIIT Account (CAS)
+                </Button>
+
+                <Divider />
+                <Text>Or login with email/password</Text>
+
                 <Input 
                     type="email" 
                     placeholder="Email (@iiit.ac.in)"
@@ -86,7 +130,7 @@ const Login = () => {
                     w="full"
                     isDisabled={!captchaToken}
                 >
-                    Login
+                    Login with Password
                 </Button>
                 <Text>
                     Don't have an account? <Link to="/register" style={{color: 'teal'}}>Register</Link>
@@ -95,5 +139,4 @@ const Login = () => {
         </Container>
     );
 };
-
 export default Login;

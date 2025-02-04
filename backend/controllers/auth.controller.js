@@ -2,6 +2,16 @@
 import User from '../model/user.model.js';
 import jwt from 'jsonwebtoken';
 import axios from 'axios';
+import CAS from 'cas';
+
+const cas = new CAS({
+    base_url: 'https://login.iiit.ac.in/cas',
+    service: 'http://localhost:5000/api/auth/cas/callback',
+    version: 2.0,
+    securityOptions: {
+        rejectUnauthorized: false // Only for development
+    }
+});
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -32,6 +42,61 @@ const verifyCaptcha = async (token) => {
     } catch (error) {
         console.error('Captcha verification error:', error);
         return false;
+    }
+};
+export const casLogin = async (req, res) => {
+    try {
+        if (!req.query.ticket) {
+            // Construct the login URL manually
+            const serviceUrl = 'http://localhost:5000/api/auth/cas/callback';
+            const casLoginUrl = 'https://login.iiit.ac.in/cas/login';
+            const loginUrl = `${casLoginUrl}?service=${encodeURIComponent(serviceUrl)}`;
+            return res.redirect(loginUrl);
+        }
+
+        // Validate ticket
+        const ticket = req.query.ticket;
+        cas.validate(ticket, async (err, status, username, extended) => {
+            if (err || !status) {
+                return res.status(401).json({
+                    success: false,
+                    message: 'CAS Authentication failed'
+                });
+            }
+
+            try {
+                // Get email from CAS response
+                const email = extended.attributes['e-mail'][0];
+                
+                // Find or create user
+                let user = await User.findOne({ email });
+                if (!user) {
+                    const name = username.split(' ');
+                    user = await User.create({
+                        firstName: name[0] || username,
+                        lastName: name[1] || '',
+                        email: email,
+                        age: 0,
+                        contactNumber: '',
+                        password: Math.random().toString(36)
+                    });
+                }
+
+                // Generate token and redirect
+                const token = generateToken(user._id);
+                res.redirect(`http://localhost:5173/login?token=${token}`);
+            } catch (error) {
+                res.status(500).json({
+                    success: false,
+                    message: error.message
+                });
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
     }
 };
 

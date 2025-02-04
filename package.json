@@ -18,6 +18,7 @@
     "@google/generative-ai": "^0.21.0",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
+    "cas": "github:kcbanner/node-cas",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "framer-motion": "^10.12.16",
