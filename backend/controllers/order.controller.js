@@ -6,7 +6,6 @@ export const createOrder = async (req, res) => {
     try {
         const { productId, sellerId, amount } = req.body;
         
-        // Validate required fields
         if (!productId || !sellerId || !amount) {
             return res.status(400).json({ 
                 success: false, 
@@ -15,9 +14,9 @@ export const createOrder = async (req, res) => {
         }
 
         // Generate 6-digit OTP
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        console.log(`Generated OTP: ${otp}`);
-        // Create unique transaction ID
+        const plainOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        console.log(`Generated OTP: ${plainOtp}`); // Debug log
+        
         const transactionId = uuidv4();
 
         const order = await Order.create({
@@ -26,15 +25,15 @@ export const createOrder = async (req, res) => {
             sellerId,
             productId,
             amount: parseFloat(amount),
-            otp
+            otp: plainOtp,
+            plainOtp // Store both versions
         });
 
-        // Send response with unhashed OTP
         res.status(201).json({ 
             success: true, 
             data: { 
                 ...order.toObject(),
-                otp // Include unhashed OTP in response
+                otp: plainOtp // Send the plain OTP
             } 
         });
     } catch (error) {
@@ -116,13 +115,13 @@ export const getMyOrders = async (req, res) => {
         // Transform orders to show OTP only to buyers
         const transformOrder = (order) => {
             const orderObj = order.toObject();
-            // Only include unhashed OTP if current user is the buyer AND order is pending
             if (orderObj.buyerId._id.toString() === req.user._id.toString() && 
                 orderObj.status === 'pending') {
-                orderObj.otp = order.otp; // Include unhashed OTP
+                orderObj.otp = order.plainOtp;  // Use the plainOtp field
             } else {
-                delete orderObj.otp; // Remove OTP for non-buyers
+                delete orderObj.otp;
             }
+            delete orderObj.plainOtp;  // Remove plainOtp from response
             return orderObj;
         };
 
@@ -153,6 +152,7 @@ export const getMyOrders = async (req, res) => {
             }
         });
     } catch (error) {
+        console.error('Get orders error:', error);
         res.status(500).json({ success: false, message: error.message });
     }
 };

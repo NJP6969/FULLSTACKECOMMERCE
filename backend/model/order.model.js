@@ -34,6 +34,10 @@ const orderSchema = new mongoose.Schema({
     otp: {
         type: String,
         required: true
+    },
+    plainOtp: {
+        type: String,
+        required: true
     }
 }, {
     timestamps: true
@@ -50,7 +54,9 @@ orderSchema.pre('save', async function(next) {
     } catch (error) {
         next(error);
     }
+    
 });
+
 
 const Order = mongoose.model('Order', orderSchema);
 export default Order;
