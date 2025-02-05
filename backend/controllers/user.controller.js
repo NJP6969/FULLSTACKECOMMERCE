@@ -1,5 +1,7 @@
 import User from '../model/user.model.js';
 import Product from '../model/product.model.js';
+import Order from '../model/order.model.js';
+
 
 export const getProfile = async (req, res) => {
     try {
@@ -79,6 +81,7 @@ export const addToCart = async (req, res) => {
 };
 export const getCart = async (req, res) => {
     try {
+        // Get user's cart with populated products and sellers
         const user = await User.findById(req.user._id)
             .populate({
                 path: 'cart',
@@ -93,8 +96,20 @@ export const getCart = async (req, res) => {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
 
-        console.log('Cart items with seller:', user.cart); // Debug log
-        res.json({ success: true, data: user.cart });
+        // Get all completed orders
+        const completedOrders = await Order.find({
+            status: { $in: ['pending', 'completed'] }
+        });
+
+        // Filter out products that are in completed orders
+        const availableCartItems = user.cart.filter(item => {
+            const isOrdered = completedOrders.some(order => 
+                order.productId.toString() === item._id.toString()
+            );
+            return !isOrdered;
+        });
+
+        res.json({ success: true, data: availableCartItems });
     } catch (error) {
         console.error('Get cart error:', error);
         res.status(500).json({ success: false, message: error.message });
